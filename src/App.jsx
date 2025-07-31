@@ -1,59 +1,66 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import ClickSummary from './components/ClickSummary';
-import AdsEngagement from './components/AdsEngagement';
-import Balance from './components/Balance';
-import TrendingAds from './components/TrendingAds';
-import CampaignStats from './components/CampaignStats';
-import CampaignGoals from './components/CampaignGoals';
-import TargetStats from './components/TargetStats';
-import Insights from './components/Insights';
+import Dashboard from './pages/Dashboard';
+import Campaign from './pages/Campaign';
+import SocialNetwork from './pages/SocialNetwork';
+import Balance from './pages/Balance';
+import Analytics from './pages/Analytics';
+import NewCampaign from './pages/NewCampaign';
 
 function App() {
-  const [activeItem, setActiveItem] = useState('analytics');
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [showNewCampaign, setShowNewCampaign] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const renderPage = () => {
+    if (showNewCampaign) {
+      return <NewCampaign onClose={() => setShowNewCampaign(false)} />;
+    }
+
+    switch (currentPage) {
+      case 'dashboard':
+        return <Dashboard searchQuery={searchQuery} />;
+      case 'campaign':
+        return <Campaign onNewCampaign={() => setShowNewCampaign(true)} searchQuery={searchQuery} />;
+      case 'social-network':
+        return <SocialNetwork searchQuery={searchQuery} />;
+      case 'balance':
+        return <Balance searchQuery={searchQuery} />;
+      case 'analytics':
+        return <Analytics searchQuery={searchQuery} />;
+      default:
+        return <Dashboard searchQuery={searchQuery} />;
+    }
+  };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <div className="flex-1 overflow-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div className="lg:col-span-2">
-              <ClickSummary />
-            </div>
-            <div>
-              <TrendingAds />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-            <div>
-              <AdsEngagement />
-            </div>
-            <div>
-              <Balance />
-            </div>
-            <div>
-              <CampaignStats />
-            </div>
-            <div>
-              <CampaignGoals />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <Insights />
-            </div>
-            <div>
-              <TargetStats />
-            </div>
-          </div>
-        </div>
+      <Sidebar 
+        currentPage={currentPage} 
+        setCurrentPage={setCurrentPage}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
+      
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <main className="flex-1 p-4 lg:p-6 overflow-x-auto">
+          {renderPage()}
+        </main>
       </div>
     </div>
   );
